@@ -121,9 +121,9 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Topic :: Security :: Cryptography",
     ],
-    command_options={
-        'sdist': {
-            'formats': ('setup.py', 'zip,gztar'),
+    options={
+        "sdist": {
+            "formats": ["gztar", "zip"],
         },
     },
 )
