@@ -54,7 +54,7 @@ install:
 dist: clean sdist manylinux1
 
 sdist: README.html README.md
-	$(PYTHON) setup.py sdist --formats gztar,zip
+	$(PYTHON) -m build
 
 manylinux1: clean
 	docker run --rm -v $(CURDIR):/io:Z \
