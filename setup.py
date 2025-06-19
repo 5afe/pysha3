@@ -2,12 +2,11 @@
 import os
 import subprocess
 import sys
-from distutils.core import Command
 from glob import glob
 try:
-    from setuptools import setup, Extension
+    from setuptools import setup, Extension, Command
 except ImportError:
-    from distutils.core import setup
+    from distutils.core import setup, Command
     from distutils.extension import Extension
 
 
@@ -89,7 +88,7 @@ with open("CHANGES.txt") as f:
 
 setup(
     name="safe-pysha3",
-    version="1.0.4",
+    version="1.0.5",
     ext_modules=exts,
     py_modules=["sha3"],
     cmdclass={"test": TestCommand},
@@ -101,7 +100,7 @@ setup(
     keywords="sha3 sha-3 keccak hash",
     platforms="POSIX, Windows",
     license="PSFL (Keccak: CC0 1.0 Universal)",
-    description="SHA-3 (Keccak) for Python 3.9 - 3.11",
+    description="SHA-3 (Keccak) for Python 3.9 - 3.13",
     long_description="\n".join(long_description),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -119,6 +118,8 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Topic :: Security :: Cryptography",
     ],
     options={
