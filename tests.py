@@ -172,7 +172,7 @@ class BaseSHA3Tests(unittest.TestCase):
 
 class BaseKeccakTests(BaseSHA3Tests):
     def test_hashlib(self):
-        self.failIf(hasattr(hashlib, self.name))
+        self.assertFalse(hasattr(hashlib, self.name))
 
 
 class BaseShakeTests(BaseSHA3Tests):
@@ -332,13 +332,14 @@ class Keccak_512Tests(BaseKeccakTests):
 
 def test_main():
     suite = unittest.TestSuite()
+    loader = unittest.TestLoader()
     classes = [
         SHA3_224Tests, SHA3_256Tests, SHA3_384Tests, SHA3_512Tests,
         Shake_128Tests, Shake_256Tests,
         Keccak_224Tests, Keccak_256Tests, Keccak_384Tests, Keccak_512Tests,
     ]
     for cls in classes:
-        suite.addTests(unittest.makeSuite(cls))
+        suite.addTests(loader.loadTestsFromTestCase(cls))
     return suite
 
 
