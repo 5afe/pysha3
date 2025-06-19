@@ -729,6 +729,10 @@ init_pysha3(void)
     }
 #endif
 
+#if PY_VERSION_HEX < 0x030900A4
+#define Py_SET_TYPE(type, value)      \
+    Py_TYPE(type) = value
+#endif
 #define init_sha3type(name, type)     \
     do {                              \
         Py_SET_TYPE(type, &PyType_Type); \
