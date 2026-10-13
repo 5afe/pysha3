@@ -16,6 +16,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include <string.h>
 #include <stdlib.h>
 #include "brg_endian.h"
+#include "load-store.h"
 #include "KeccakP-1600-opt64-config.h"
 
 #if NOT_PYTHON
@@ -120,42 +121,29 @@ void KeccakP1600_AddLanes(void *state, const unsigned char *data, unsigned int l
 {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
     unsigned int i = 0;
-#ifdef NO_MISALIGNED_ACCESSES
-    /* If either pointer is misaligned, fall back to byte-wise xor. */
 
-    if (((((uintptr_t)state) & 7) != 0) || ((((uintptr_t)data) & 7) != 0)) {
-      for (i = 0; i < laneCount * 8; i++) {
-        ((unsigned char*)state)[i] ^= data[i];
-      }
+    for( ; (i+8)<=laneCount; i+=8) {
+        ((UINT64*)state)[i+0] ^= XKCP_load64(data+(i+0)*8);
+        ((UINT64*)state)[i+1] ^= XKCP_load64(data+(i+1)*8);
+        ((UINT64*)state)[i+2] ^= XKCP_load64(data+(i+2)*8);
+        ((UINT64*)state)[i+3] ^= XKCP_load64(data+(i+3)*8);
+        ((UINT64*)state)[i+4] ^= XKCP_load64(data+(i+4)*8);
+        ((UINT64*)state)[i+5] ^= XKCP_load64(data+(i+5)*8);
+        ((UINT64*)state)[i+6] ^= XKCP_load64(data+(i+6)*8);
+        ((UINT64*)state)[i+7] ^= XKCP_load64(data+(i+7)*8);
     }
-    else
-#endif
-    {
-      /* Otherwise... */
-
-      for( ; (i+8)<=laneCount; i+=8) {
-          ((UINT64*)state)[i+0] ^= ((UINT64*)data)[i+0];
-          ((UINT64*)state)[i+1] ^= ((UINT64*)data)[i+1];
-          ((UINT64*)state)[i+2] ^= ((UINT64*)data)[i+2];
-          ((UINT64*)state)[i+3] ^= ((UINT64*)data)[i+3];
-          ((UINT64*)state)[i+4] ^= ((UINT64*)data)[i+4];
-          ((UINT64*)state)[i+5] ^= ((UINT64*)data)[i+5];
-          ((UINT64*)state)[i+6] ^= ((UINT64*)data)[i+6];
-          ((UINT64*)state)[i+7] ^= ((UINT64*)data)[i+7];
-      }
-      for( ; (i+4)<=laneCount; i+=4) {
-          ((UINT64*)state)[i+0] ^= ((UINT64*)data)[i+0];
-          ((UINT64*)state)[i+1] ^= ((UINT64*)data)[i+1];
-          ((UINT64*)state)[i+2] ^= ((UINT64*)data)[i+2];
-          ((UINT64*)state)[i+3] ^= ((UINT64*)data)[i+3];
-      }
-      for( ; (i+2)<=laneCount; i+=2) {
-          ((UINT64*)state)[i+0] ^= ((UINT64*)data)[i+0];
-          ((UINT64*)state)[i+1] ^= ((UINT64*)data)[i+1];
-      }
-      if (i<laneCount) {
-          ((UINT64*)state)[i+0] ^= ((UINT64*)data)[i+0];
-      }
+    for( ; (i+4)<=laneCount; i+=4) {
+        ((UINT64*)state)[i+0] ^= XKCP_load64(data+(i+0)*8);
+        ((UINT64*)state)[i+1] ^= XKCP_load64(data+(i+1)*8);
+        ((UINT64*)state)[i+2] ^= XKCP_load64(data+(i+2)*8);
+        ((UINT64*)state)[i+3] ^= XKCP_load64(data+(i+3)*8);
+    }
+    for( ; (i+2)<=laneCount; i+=2) {
+        ((UINT64*)state)[i+0] ^= XKCP_load64(data+(i+0)*8);
+        ((UINT64*)state)[i+1] ^= XKCP_load64(data+(i+1)*8);
+    }
+    if (i<laneCount) {
+        ((UINT64*)state)[i+0] ^= XKCP_load64(data+(i+0)*8);
     }
 #else
     unsigned int i;
@@ -223,9 +211,9 @@ void KeccakP1600_OverwriteLanes(void *state, const unsigned char *data, unsigned
 
     for(lanePosition=0; lanePosition<laneCount; lanePosition++)
         if ((lanePosition == 1) || (lanePosition == 2) || (lanePosition == 8) || (lanePosition == 12) || (lanePosition == 17) || (lanePosition == 20))
-            ((UINT64*)state)[lanePosition] = ~((const UINT64*)data)[lanePosition];
+            ((UINT64*)state)[lanePosition] = ~XKCP_load64(data+lanePosition*8);
         else
-            ((UINT64*)state)[lanePosition] = ((const UINT64*)data)[lanePosition];
+            ((UINT64*)state)[lanePosition] = XKCP_load64(data+lanePosition*8);
 #else
     memcpy(state, data, laneCount*8);
 #endif
@@ -348,17 +336,17 @@ void KeccakP1600_ExtractLanes(const void *state, unsigned char *data, unsigned i
 #endif
 #ifdef KeccakP1600_useLaneComplementing
     if (laneCount > 1) {
-        ((UINT64*)data)[ 1] = ~((UINT64*)data)[ 1];
+        XKCP_store64(data+1*8, ~XKCP_load64(data+1*8));
         if (laneCount > 2) {
-            ((UINT64*)data)[ 2] = ~((UINT64*)data)[ 2];
+            XKCP_store64(data+2*8, ~XKCP_load64(data+2*8));
             if (laneCount > 8) {
-                ((UINT64*)data)[ 8] = ~((UINT64*)data)[ 8];
+                XKCP_store64(data+8*8, ~XKCP_load64(data+8*8));
                 if (laneCount > 12) {
-                    ((UINT64*)data)[12] = ~((UINT64*)data)[12];
+                    XKCP_store64(data+12*8, ~XKCP_load64(data+12*8));
                     if (laneCount > 17) {
-                        ((UINT64*)data)[17] = ~((UINT64*)data)[17];
+                        XKCP_store64(data+17*8, ~XKCP_load64(data+17*8));
                         if (laneCount > 20) {
-                            ((UINT64*)data)[20] = ~((UINT64*)data)[20];
+                            XKCP_store64(data+20*8, ~XKCP_load64(data+20*8));
                         }
                     }
                 }
@@ -414,7 +402,7 @@ void KeccakP1600_ExtractAndAddLanes(const void *state, const unsigned char *inpu
 
     for(i=0; i<laneCount; i++) {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-        ((UINT64*)output)[i] = ((UINT64*)input)[i] ^ ((const UINT64*)state)[i];
+        XKCP_store64(output+i*8, XKCP_load64(input+i*8) ^ ((const UINT64*)state)[i]);
 #else
         fromWordToBytes(temp, ((const UINT64*)state)[i]);
         for(j=0; j<8; j++)
@@ -423,17 +411,17 @@ void KeccakP1600_ExtractAndAddLanes(const void *state, const unsigned char *inpu
     }
 #ifdef KeccakP1600_useLaneComplementing
     if (laneCount > 1) {
-        ((UINT64*)output)[ 1] = ~((UINT64*)output)[ 1];
+        XKCP_store64(output+1*8, ~XKCP_load64(output+1*8));
         if (laneCount > 2) {
-            ((UINT64*)output)[ 2] = ~((UINT64*)output)[ 2];
+            XKCP_store64(output+2*8, ~XKCP_load64(output+2*8));
             if (laneCount > 8) {
-                ((UINT64*)output)[ 8] = ~((UINT64*)output)[ 8];
+                XKCP_store64(output+8*8, ~XKCP_load64(output+8*8));
                 if (laneCount > 12) {
-                    ((UINT64*)output)[12] = ~((UINT64*)output)[12];
+                    XKCP_store64(output+12*8, ~XKCP_load64(output+12*8));
                     if (laneCount > 17) {
-                        ((UINT64*)output)[17] = ~((UINT64*)output)[17];
+                        XKCP_store64(output+17*8, ~XKCP_load64(output+17*8));
                         if (laneCount > 20) {
-                            ((UINT64*)output)[20] = ~((UINT64*)output)[20];
+                            XKCP_store64(output+20*8, ~XKCP_load64(output+20*8));
                         }
                     }
                 }
@@ -460,13 +448,12 @@ size_t KeccakF1600_FastLoop_Absorb(void *state, unsigned int laneCount, const un
     unsigned int i;
     #endif
     UINT64 *stateAsLanes = (UINT64*)state;
-    UINT64 *inDataAsLanes = (UINT64*)data;
 
     copyFromState(A, stateAsLanes)
     while(dataByteLen >= laneCount*8) {
-        addInput(A, inDataAsLanes, laneCount)
+        addInput(A, data, laneCount)
         rounds24
-        inDataAsLanes += laneCount;
+        data += laneCount*8;
         dataByteLen -= laneCount*8;
     }
     copyToState(stateAsLanes, A)

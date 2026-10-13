@@ -117,10 +117,40 @@
 #define SHA3_LANESIZE (20 * 8) /* ExtractLane needs max uint64_t[20] extra. */
 #define SHA3_state Keccak_HashInstance
 #define SHA3_init Keccak_HashInitialize
-#define SHA3_process Keccak_HashUpdate
 #define SHA3_done Keccak_HashFinal
 #define SHA3_squeeze Keccak_HashSqueeze
 #define SHA3_copystate(dest, src) memcpy(&(dest), &(src), sizeof(SHA3_state))
+
+/* Largest SHAKE digest in bytes. It keeps the length in bits inside 32 bits
+ * and the digest buffer size away from overflow on every platform. */
+#define SHAKE_MAX_DIGESTSIZE (1 << 29)
+
+/* Keccak_HashUpdate() takes the length in bits as a size_t, which overflows
+ * for large buffers on 32-bit platforms. Feed the data in chunks that always
+ * fit. Every chunk is a whole number of bytes, so it can be split anywhere. */
+#define SHA3_MAX_CHUNKSIZE (((size_t)-1) / 8)
+
+static HashReturn
+SHA3_process(SHA3_state *state, const void *data, Py_ssize_t len)
+{
+    const unsigned char *cur = (const unsigned char *)data;
+    size_t remaining = (size_t)len;
+    HashReturn res = SUCCESS;
+
+    while (remaining > 0) {
+        size_t chunk = remaining;
+        if (chunk > SHA3_MAX_CHUNKSIZE) {
+            chunk = SHA3_MAX_CHUNKSIZE;
+        }
+        res = Keccak_HashUpdate(state, cur, chunk * 8);
+        if (res != SUCCESS) {
+            return res;
+        }
+        cur += chunk;
+        remaining -= chunk;
+    }
+    return res;
+}
 
 /*[clinic input]
 module _pysha3
@@ -229,14 +259,14 @@ py_sha3_new_impl(PyTypeObject *type, PyObject *data)
              * thus it's safe to release the GIL without locking the object.
              */
             Py_BEGIN_ALLOW_THREADS
-            res = SHA3_process(&self->hash_state, buf.buf, buf.len * 8);
+            res = SHA3_process(&self->hash_state, buf.buf, buf.len);
             Py_END_ALLOW_THREADS
         }
         else {
-            res = SHA3_process(&self->hash_state, buf.buf, buf.len * 8);
+            res = SHA3_process(&self->hash_state, buf.buf, buf.len);
         }
 #else
-        res = SHA3_process(&self->hash_state, buf.buf, buf.len * 8);
+        res = SHA3_process(&self->hash_state, buf.buf, buf.len);
 #endif
         if (res != SUCCESS) {
             PyErr_SetString(PyExc_RuntimeError,
@@ -386,15 +416,15 @@ _sha3_sha3_224_update(SHA3object *self, PyObject *obj)
     if (self->lock) {
         Py_BEGIN_ALLOW_THREADS
         PyThread_acquire_lock(self->lock, 1);
-        res = SHA3_process(&self->hash_state, buf.buf, buf.len * 8);
+        res = SHA3_process(&self->hash_state, buf.buf, buf.len);
         PyThread_release_lock(self->lock);
         Py_END_ALLOW_THREADS
     }
     else {
-        res = SHA3_process(&self->hash_state, buf.buf, buf.len * 8);
+        res = SHA3_process(&self->hash_state, buf.buf, buf.len);
     }
 #else
-    res = SHA3_process(&self->hash_state, buf.buf, buf.len * 8);
+    res = SHA3_process(&self->hash_state, buf.buf, buf.len);
 #endif
 
     if (res != SUCCESS) {
@@ -602,6 +632,11 @@ _SHAKE_digest(SHA3object *self, unsigned long digestlen, int hex)
     int res;
     PyObject *result = NULL;
 
+    if (digestlen >= SHAKE_MAX_DIGESTSIZE) {
+        PyErr_SetString(PyExc_ValueError, "length is too large");
+        return NULL;
+    }
+
     /* ExtractLane needs at least SHA3_MAX_DIGESTSIZE + SHA3_LANESIZE and
      * SHA3_LANESIZE extra space.
      */
@@ -622,7 +657,7 @@ _SHAKE_digest(SHA3object *self, unsigned long digestlen, int hex)
     res = SHA3_squeeze(&temp, digest, digestlen * 8);
     if (res != SUCCESS) {
         PyErr_SetString(PyExc_RuntimeError, "internal error in SHA3 Squeeze()");
-        return NULL;
+        goto error;
     }
     SHA3_clearstate(temp);
     if (hex) {
