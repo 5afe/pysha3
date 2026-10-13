@@ -83,6 +83,11 @@ the sha3 module directly and rather go through the hashlib interface:
 Changelog
 ---------
 
+### pysha3 1.0.6
+
+- Make pysha3 compatible with Python 3.14
+- Drop support for Python 3.9
+
 ### pysha3 1.0.5
 
 - Make pysha3 compatible with Python 3.13

@@ -1,6 +1,29 @@
 Changelog
 =========
 
+pysha3 1.0.6
+------------
+
+*Unreleased*
+
+- Make pysha3 compatible with Python 3.14
+- Drop support for Python 3.9
+
+pysha3 1.0.5
+------------
+
+*Release: 20-Jun-2025*
+
+- Make pysha3 compatible with Python 3.13
+- Refactor deployment process to use `build`
+
+pysha3 1.0.4
+------------
+
+*Release: 20-Jun-2025*
+
+- Make pysha3 compatible with Python 3.11
+
 pysha3 1.0.3-dev
 ----------------
 
