@@ -1,6 +1,30 @@
 Changelog
 =========
 
+pysha3 1.0.6
+------------
+
+*Unreleased*
+
+- Make pysha3 compatible with Python 3.14
+- Drop support for Python 3.9
+- Publish wheels for Linux x86_64 and aarch64 on every GitHub release
+
+pysha3 1.0.5
+------------
+
+*Release: 20-Jun-2025*
+
+- Make pysha3 compatible with Python 3.13
+- Refactor deployment process to use `build`
+
+pysha3 1.0.4
+------------
+
+*Release: 20-Jun-2025*
+
+- Make pysha3 compatible with Python 3.11
+
 pysha3 1.0.3-dev
 ----------------
 
