@@ -88,7 +88,7 @@ with open("CHANGES.txt") as f:
 
 setup(
     name="safe-pysha3",
-    version="1.0.6",
+    version="1.0.7",
     ext_modules=exts,
     py_modules=["sha3"],
     cmdclass={"test": TestCommand},
@@ -105,7 +105,7 @@ setup(
     keywords="sha3 sha-3 keccak hash",
     platforms="POSIX, Windows",
     license="PSFL (Keccak: CC0 1.0 Universal)",
-    description="SHA-3 (Keccak) for Python 3.10 - 3.14",
+    description="SHA-3 (Keccak) for Python 3.10 - 3.15",
     long_description="\n".join(long_description),
     python_requires=">=3.10",
     classifiers=[
@@ -126,6 +126,7 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
         "Topic :: Security :: Cryptography",
     ],
     options={

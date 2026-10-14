@@ -83,9 +83,9 @@ the sha3 module directly and rather go through the hashlib interface:
 Changelog
 ---------
 
-### pysha3 1.0.6
+### pysha3 1.0.7
 
-- Make pysha3 compatible with Python 3.14
+- Make pysha3 compatible with Python 3.14 and 3.15
 - Drop support for Python 3.9
 - Publish wheels for Linux x86_64 and aarch64 on every GitHub release
 

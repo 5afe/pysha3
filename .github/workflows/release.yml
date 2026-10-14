@@ -9,7 +9,7 @@ permissions: {}
 
 env:
   # CPython only, free-threaded builds are not supported
-  CIBW_BUILD: "cp310-* cp311-* cp312-* cp313-* cp314-*"
+  CIBW_BUILD: "cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*"
   CIBW_TEST_SOURCES: "tests.py vectors"
   CIBW_TEST_COMMAND: "python tests.py"
 
