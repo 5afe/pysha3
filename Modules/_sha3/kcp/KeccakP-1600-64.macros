@@ -776,29 +776,37 @@ http://creativecommons.org/publicdomain/zero/1.0/
         } \
     }
 
+/*
+ * Read lane number i from the input byte stream. The input pointer does not
+ * need to be aligned: on platforms that support misaligned accesses
+ * XKCP_load64() compiles to a single load, elsewhere to a safe byte sequence.
+ * This implementation is only used on little-endian platforms.
+ */
+#define loadInputLane(input, i) XKCP_load64((input)+8*(i))
+
 #define addInput(X, input, laneCount) \
     if (laneCount == 21) { \
-        X##ba ^= input[ 0]; \
-        X##be ^= input[ 1]; \
-        X##bi ^= input[ 2]; \
-        X##bo ^= input[ 3]; \
-        X##bu ^= input[ 4]; \
-        X##ga ^= input[ 5]; \
-        X##ge ^= input[ 6]; \
-        X##gi ^= input[ 7]; \
-        X##go ^= input[ 8]; \
-        X##gu ^= input[ 9]; \
-        X##ka ^= input[10]; \
-        X##ke ^= input[11]; \
-        X##ki ^= input[12]; \
-        X##ko ^= input[13]; \
-        X##ku ^= input[14]; \
-        X##ma ^= input[15]; \
-        X##me ^= input[16]; \
-        X##mi ^= input[17]; \
-        X##mo ^= input[18]; \
-        X##mu ^= input[19]; \
-        X##sa ^= input[20]; \
+        X##ba ^= loadInputLane(input, 0); \
+        X##be ^= loadInputLane(input, 1); \
+        X##bi ^= loadInputLane(input, 2); \
+        X##bo ^= loadInputLane(input, 3); \
+        X##bu ^= loadInputLane(input, 4); \
+        X##ga ^= loadInputLane(input, 5); \
+        X##ge ^= loadInputLane(input, 6); \
+        X##gi ^= loadInputLane(input, 7); \
+        X##go ^= loadInputLane(input, 8); \
+        X##gu ^= loadInputLane(input, 9); \
+        X##ka ^= loadInputLane(input, 10); \
+        X##ke ^= loadInputLane(input, 11); \
+        X##ki ^= loadInputLane(input, 12); \
+        X##ko ^= loadInputLane(input, 13); \
+        X##ku ^= loadInputLane(input, 14); \
+        X##ma ^= loadInputLane(input, 15); \
+        X##me ^= loadInputLane(input, 16); \
+        X##mi ^= loadInputLane(input, 17); \
+        X##mo ^= loadInputLane(input, 18); \
+        X##mu ^= loadInputLane(input, 19); \
+        X##sa ^= loadInputLane(input, 20); \
     } \
     else if (laneCount < 16) { \
         if (laneCount < 8) { \
@@ -807,165 +815,165 @@ http://creativecommons.org/publicdomain/zero/1.0/
                     if (laneCount < 1) { \
                     } \
                     else { \
-                        X##ba ^= input[ 0]; \
+                        X##ba ^= loadInputLane(input, 0); \
                     } \
                 } \
                 else { \
-                    X##ba ^= input[ 0]; \
-                    X##be ^= input[ 1]; \
+                    X##ba ^= loadInputLane(input, 0); \
+                    X##be ^= loadInputLane(input, 1); \
                     if (laneCount < 3) { \
                     } \
                     else { \
-                        X##bi ^= input[ 2]; \
+                        X##bi ^= loadInputLane(input, 2); \
                     } \
                 } \
             } \
             else { \
-                X##ba ^= input[ 0]; \
-                X##be ^= input[ 1]; \
-                X##bi ^= input[ 2]; \
-                X##bo ^= input[ 3]; \
+                X##ba ^= loadInputLane(input, 0); \
+                X##be ^= loadInputLane(input, 1); \
+                X##bi ^= loadInputLane(input, 2); \
+                X##bo ^= loadInputLane(input, 3); \
                 if (laneCount < 6) { \
                     if (laneCount < 5) { \
                     } \
                     else { \
-                        X##bu ^= input[ 4]; \
+                        X##bu ^= loadInputLane(input, 4); \
                     } \
                 } \
                 else { \
-                    X##bu ^= input[ 4]; \
-                    X##ga ^= input[ 5]; \
+                    X##bu ^= loadInputLane(input, 4); \
+                    X##ga ^= loadInputLane(input, 5); \
                     if (laneCount < 7) { \
                     } \
                     else { \
-                        X##ge ^= input[ 6]; \
+                        X##ge ^= loadInputLane(input, 6); \
                     } \
                 } \
             } \
         } \
         else { \
-            X##ba ^= input[ 0]; \
-            X##be ^= input[ 1]; \
-            X##bi ^= input[ 2]; \
-            X##bo ^= input[ 3]; \
-            X##bu ^= input[ 4]; \
-            X##ga ^= input[ 5]; \
-            X##ge ^= input[ 6]; \
-            X##gi ^= input[ 7]; \
+            X##ba ^= loadInputLane(input, 0); \
+            X##be ^= loadInputLane(input, 1); \
+            X##bi ^= loadInputLane(input, 2); \
+            X##bo ^= loadInputLane(input, 3); \
+            X##bu ^= loadInputLane(input, 4); \
+            X##ga ^= loadInputLane(input, 5); \
+            X##ge ^= loadInputLane(input, 6); \
+            X##gi ^= loadInputLane(input, 7); \
             if (laneCount < 12) { \
                 if (laneCount < 10) { \
                     if (laneCount < 9) { \
                     } \
                     else { \
-                        X##go ^= input[ 8]; \
+                        X##go ^= loadInputLane(input, 8); \
                     } \
                 } \
                 else { \
-                    X##go ^= input[ 8]; \
-                    X##gu ^= input[ 9]; \
+                    X##go ^= loadInputLane(input, 8); \
+                    X##gu ^= loadInputLane(input, 9); \
                     if (laneCount < 11) { \
                     } \
                     else { \
-                        X##ka ^= input[10]; \
+                        X##ka ^= loadInputLane(input, 10); \
                     } \
                 } \
             } \
             else { \
-                X##go ^= input[ 8]; \
-                X##gu ^= input[ 9]; \
-                X##ka ^= input[10]; \
-                X##ke ^= input[11]; \
+                X##go ^= loadInputLane(input, 8); \
+                X##gu ^= loadInputLane(input, 9); \
+                X##ka ^= loadInputLane(input, 10); \
+                X##ke ^= loadInputLane(input, 11); \
                 if (laneCount < 14) { \
                     if (laneCount < 13) { \
                     } \
                     else { \
-                        X##ki ^= input[12]; \
+                        X##ki ^= loadInputLane(input, 12); \
                     } \
                 } \
                 else { \
-                    X##ki ^= input[12]; \
-                    X##ko ^= input[13]; \
+                    X##ki ^= loadInputLane(input, 12); \
+                    X##ko ^= loadInputLane(input, 13); \
                     if (laneCount < 15) { \
                     } \
                     else { \
-                        X##ku ^= input[14]; \
+                        X##ku ^= loadInputLane(input, 14); \
                     } \
                 } \
             } \
         } \
     } \
     else { \
-        X##ba ^= input[ 0]; \
-        X##be ^= input[ 1]; \
-        X##bi ^= input[ 2]; \
-        X##bo ^= input[ 3]; \
-        X##bu ^= input[ 4]; \
-        X##ga ^= input[ 5]; \
-        X##ge ^= input[ 6]; \
-        X##gi ^= input[ 7]; \
-        X##go ^= input[ 8]; \
-        X##gu ^= input[ 9]; \
-        X##ka ^= input[10]; \
-        X##ke ^= input[11]; \
-        X##ki ^= input[12]; \
-        X##ko ^= input[13]; \
-        X##ku ^= input[14]; \
-        X##ma ^= input[15]; \
+        X##ba ^= loadInputLane(input, 0); \
+        X##be ^= loadInputLane(input, 1); \
+        X##bi ^= loadInputLane(input, 2); \
+        X##bo ^= loadInputLane(input, 3); \
+        X##bu ^= loadInputLane(input, 4); \
+        X##ga ^= loadInputLane(input, 5); \
+        X##ge ^= loadInputLane(input, 6); \
+        X##gi ^= loadInputLane(input, 7); \
+        X##go ^= loadInputLane(input, 8); \
+        X##gu ^= loadInputLane(input, 9); \
+        X##ka ^= loadInputLane(input, 10); \
+        X##ke ^= loadInputLane(input, 11); \
+        X##ki ^= loadInputLane(input, 12); \
+        X##ko ^= loadInputLane(input, 13); \
+        X##ku ^= loadInputLane(input, 14); \
+        X##ma ^= loadInputLane(input, 15); \
         if (laneCount < 24) { \
             if (laneCount < 20) { \
                 if (laneCount < 18) { \
                     if (laneCount < 17) { \
                     } \
                     else { \
-                        X##me ^= input[16]; \
+                        X##me ^= loadInputLane(input, 16); \
                     } \
                 } \
                 else { \
-                    X##me ^= input[16]; \
-                    X##mi ^= input[17]; \
+                    X##me ^= loadInputLane(input, 16); \
+                    X##mi ^= loadInputLane(input, 17); \
                     if (laneCount < 19) { \
                     } \
                     else { \
-                        X##mo ^= input[18]; \
+                        X##mo ^= loadInputLane(input, 18); \
                     } \
                 } \
             } \
             else { \
-                X##me ^= input[16]; \
-                X##mi ^= input[17]; \
-                X##mo ^= input[18]; \
-                X##mu ^= input[19]; \
+                X##me ^= loadInputLane(input, 16); \
+                X##mi ^= loadInputLane(input, 17); \
+                X##mo ^= loadInputLane(input, 18); \
+                X##mu ^= loadInputLane(input, 19); \
                 if (laneCount < 22) { \
                     if (laneCount < 21) { \
                     } \
                     else { \
-                        X##sa ^= input[20]; \
+                        X##sa ^= loadInputLane(input, 20); \
                     } \
                 } \
                 else { \
-                    X##sa ^= input[20]; \
-                    X##se ^= input[21]; \
+                    X##sa ^= loadInputLane(input, 20); \
+                    X##se ^= loadInputLane(input, 21); \
                     if (laneCount < 23) { \
                     } \
                     else { \
-                        X##si ^= input[22]; \
+                        X##si ^= loadInputLane(input, 22); \
                     } \
                 } \
             } \
         } \
         else { \
-            X##me ^= input[16]; \
-            X##mi ^= input[17]; \
-            X##mo ^= input[18]; \
-            X##mu ^= input[19]; \
-            X##sa ^= input[20]; \
-            X##se ^= input[21]; \
-            X##si ^= input[22]; \
-            X##so ^= input[23]; \
+            X##me ^= loadInputLane(input, 16); \
+            X##mi ^= loadInputLane(input, 17); \
+            X##mo ^= loadInputLane(input, 18); \
+            X##mu ^= loadInputLane(input, 19); \
+            X##sa ^= loadInputLane(input, 20); \
+            X##se ^= loadInputLane(input, 21); \
+            X##si ^= loadInputLane(input, 22); \
+            X##so ^= loadInputLane(input, 23); \
             if (laneCount < 25) { \
             } \
             else { \
-                X##su ^= input[24]; \
+                X##su ^= loadInputLane(input, 24); \
             } \
         } \
     }
