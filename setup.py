@@ -88,7 +88,7 @@ with open("CHANGES.txt") as f:
 
 setup(
     name="safe-pysha3",
-    version="1.0.5",
+    version="1.0.7",
     ext_modules=exts,
     py_modules=["sha3"],
     cmdclass={"test": TestCommand},
@@ -97,11 +97,17 @@ setup(
     maintainer="Uxío Fuentefría",
     maintainer_email="uxio@safe.global",
     url="https://github.com/5afe/pysha3",
+    project_urls={
+        "Source": "https://github.com/5afe/pysha3",
+        "Issues": "https://github.com/5afe/pysha3/issues",
+        "Changelog": "https://github.com/5afe/pysha3/blob/master/CHANGES.txt",
+    },
     keywords="sha3 sha-3 keccak hash",
     platforms="POSIX, Windows",
     license="PSFL (Keccak: CC0 1.0 Universal)",
-    description="SHA-3 (Keccak) for Python 3.9 - 3.13",
+    description="SHA-3 (Keccak) for Python 3.10 - 3.15",
     long_description="\n".join(long_description),
+    python_requires=">=3.10",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -115,11 +121,12 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: C",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
         "Topic :: Security :: Cryptography",
     ],
     options={
