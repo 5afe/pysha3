@@ -158,6 +158,24 @@ class BaseSHA3Tests(unittest.TestCase):
                 self.assertEqual(sha3.hexdigest(), hexdigest)
                 self.assertEqual(sha3.digest(), digest)
 
+    def _digest(self, sha3):
+        if self.shake:
+            return sha3.digest(64)
+        return sha3.digest()
+
+    def test_long_unaligned(self):
+        # Several full blocks, so the fast absorb loop reads unaligned lanes
+        msg = bytes(bytearray(range(256))) * 8
+        expected = self._digest(self.new(msg))
+        for i in range(1, 8):
+            unaligned = memoryview(i * b"\x00" + msg)[i:]
+            self.assertEqual(self._digest(self.new(unaligned)), expected)
+
+            sha3 = self.new()
+            sha3.update(unaligned[:3])
+            sha3.update(unaligned[3:])
+            self.assertEqual(self._digest(sha3), expected)
+
     def test_hmac(self):
         for (key, msg), expected in zip(self.hmac_vectors, self.hmac_results):
             key = fromhex(key)
@@ -177,6 +195,13 @@ class BaseKeccakTests(BaseSHA3Tests):
 
 class BaseShakeTests(BaseSHA3Tests):
     shake = True
+
+    def test_digest_too_large(self):
+        sha3 = self.new(b"data")
+        for length in (2 ** 29, 2 ** 64 - 1, -1):
+            self.assertRaises(ValueError, sha3.digest, length)
+            self.assertRaises(ValueError, sha3.hexdigest, length)
+        self.assertEqual(len(sha3.digest(2 ** 20)), 2 ** 20)
 
     def assertHashDigest(self, hexmsg, hexdigest):
         hexdigest = hexdigest.lower()
