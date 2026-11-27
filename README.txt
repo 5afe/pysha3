@@ -1,3 +1,24 @@
+===========================
+Use safe-eth-native instead
+===========================
+
+`safe-eth-py <https://github.com/safe-global/safe-eth-py>`_ does not use this package anymore.
+Since safe-eth-py 8.0.0, keccak256 comes from
+`safe-eth-native <https://pypi.org/project/safe-eth-native/>`_, a Rust extension published from
+the `safe-eth-py repository <https://github.com/safe-global/safe-eth-py/tree/main/native>`_. On
+``import safe_eth``, it also becomes the keccak256 of eth-hash, so web3, eth-utils and
+eth-account use it.
+
+To move from ``ETH_HASH_BACKEND=pysha3``:
+
+- Install safe-eth-py 8.0.0 or newer. It requires safe-eth-native.
+- Remove the ``ETH_HASH_BACKEND`` environment variable. With ``ETH_HASH_BACKEND=pysha3`` and no
+  pysha3 installed, ``import safe_eth`` fails.
+
+Without safe-eth-py, ``safe_eth_native.keccak256(data)`` returns the same digest as
+``sha3.keccak_256(data).digest()``.
+
+
 ======
 pysha3
 ======
